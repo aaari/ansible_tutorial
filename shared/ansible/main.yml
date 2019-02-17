@@ -1,0 +1,28 @@
+- hosts: targets
+  user: root
+  vars:
+    packages:
+      - jq
+      - ruby
+      - httpd
+      - sl
+  tasks:
+    - name: output message.
+      debug: msg="{{ message }}"
+
+    - name: output fruits
+      debug: msg="We want {{ item.value.amount }} {{ item.key }} !" 
+      with_dict: "{{ fruits }}"
+    - name: install packages from yum
+      yum: 
+        name: "{{ packages }}"
+        state: latest
+    - name: register cron job
+      cron: name="check ping" day="*/2" hour="12" minute="0" job="ping -c 3 192.168.100.10"
+    - name: create directories
+      file: path={{ item.path }} owner={{ item.owner }} group={{ item.group }} mode=0{{ item.mode }} state=directory
+      with_items:
+         - { "path":"/opt/ansible", "owner":"root", "group":"root", "mode":"755" }
+         - { "path":"/opt/vagrant", "owner":"vagrant", "group":"vagrant", "mode":"755" }
+    - name: copy files
+      copy: src=./files/hoge dest=/opt/ansible/hoge owner=root group=root mode=0755
